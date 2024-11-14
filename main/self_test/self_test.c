@@ -225,9 +225,6 @@ void self_test(void * pvParameters)
 
     // Calibrate the temp sensor if need be
     switch (GLOBAL_STATE->device_model) {
-        case DEVICE_MAX:
-        case DEVICE_ULTRA:
-        case DEVICE_SUPRA:
         case DEVICE_GAMMA:
                 // Init the asic and send 0 freq so we don't ramp up and produce any heat. This will init the temp sensor.
                 (GLOBAL_STATE->ASIC_functions.init_fn)(0, GLOBAL_STATE->asic_count);
@@ -255,21 +252,24 @@ void self_test(void * pvParameters)
 
                 float offset = asic_temp_new - air_temp;
                 ESP_LOGI(TAG, "Temp Offset: %f", offset);
+
+                if(offset > 50){
+                    display_msg("OFST 2 BIG", GLOBAL_STATE);
+                    return;
+                }
                 //Multiply by 10 to add some precision, divide by 10 when get_u16
                 nvs_config_set_u16(NVS_CONFIG_EXTERNAL_TEMP_OFFSET, offset * 10);
 
                 //Re init the vcore and asic to proceed with testing
                 VCORE_init(GLOBAL_STATE);
                 VCORE_set_voltage(nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE) / 1000.0, GLOBAL_STATE);
-                chips_detected = (GLOBAL_STATE->ASIC_functions.init_fn)(GLOBAL_STATE->POWER_MANAGEMENT_MODULE.frequency_value, GLOBAL_STATE->asic_count);
-                ESP_LOGI(TAG, "%u chips detected, %u expected", chips_detected, GLOBAL_STATE->asic_count);
             break;
         default:
-            //init the vcore and asic to proceed with testing
-            chips_detected = (GLOBAL_STATE->ASIC_functions.init_fn)(GLOBAL_STATE->POWER_MANAGEMENT_MODULE.frequency_value, GLOBAL_STATE->asic_count);
-            ESP_LOGI(TAG, "%u chips detected, %u expected", chips_detected, GLOBAL_STATE->asic_count);
     }
 
+    //init the vcore and asic to proceed with testing
+    chips_detected = (GLOBAL_STATE->ASIC_functions.init_fn)(GLOBAL_STATE->POWER_MANAGEMENT_MODULE.frequency_value, GLOBAL_STATE->asic_count);
+    ESP_LOGI(TAG, "%u chips detected, %u expected", chips_detected, GLOBAL_STATE->asic_count);
 
     int baud = (*GLOBAL_STATE->ASIC_functions.set_max_baud_fn)();
     vTaskDelay(10 / portTICK_PERIOD_MS);

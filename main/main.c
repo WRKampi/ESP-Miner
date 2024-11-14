@@ -20,6 +20,7 @@
 #include "adc.h"
 #include "nvs_device.h"
 #include "self_test.h"
+#include "migration.h"
 
 static GlobalState GLOBAL_STATE = {
     .extranonce_str = NULL, 
@@ -62,6 +63,8 @@ void app_main(void)
         self_test((void *) &GLOBAL_STATE);
         vTaskDelay(60 * 60 * 1000 / portTICK_PERIOD_MS);
     }
+
+    run_migrations((void *) &GLOBAL_STATE);
 
     SYSTEM_init_system(&GLOBAL_STATE);
 
