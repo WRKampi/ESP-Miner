@@ -485,9 +485,10 @@ static uint8_t _send_init(uint64_t frequency, uint16_t asic_count)
         _send_BM1366((TYPE_CMD | GROUP_SINGLE | CMD_WRITE), set_3c_register_third, 6, BM1366_SERIALTX_DEBUG);
     }
 
-    do_frequency_ramp_up();
-
-    BM1366_send_hash_frequency(frequency);
+    if(frequency != 0){
+        do_frequency_ramp_up();
+        BM1366_send_hash_frequency(frequency);
+    }
 
     //register 10 is still a bit of a mystery. discussion: https://github.com/skot/ESP-Miner/pull/167
 

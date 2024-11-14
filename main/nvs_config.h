@@ -29,6 +29,7 @@
 #define NVS_CONFIG_BEST_DIFF "bestdiff"
 #define NVS_CONFIG_SELF_TEST "selftest"
 #define NVS_CONFIG_OVERHEAT_MODE "overheat_mode"
+#define NVS_CONFIG_EXTERNAL_TEMP_OFFSET "ext_temp_offset"
 
 #define NVS_CONFIG_SWARM "swarmconfig"
 

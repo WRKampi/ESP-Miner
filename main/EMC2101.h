@@ -66,6 +66,8 @@
 #define FAN_LOOKUP_TABLE_T8 0x5E
 #define FAN_LOOKUP_TABLE_S8 0x5F
 
+#define EMC2101_EXTERNAL_IDEALITY_FACTOR_REG 0x17 // External ideality factor register (temperature slope)
+#define EMC2101_BETA_COMPENSATION_FACTOR_REG 0x18 // Beta compensation register
 /**
  * @brief
  *
@@ -91,4 +93,6 @@ uint16_t EMC2101_get_fan_speed(void);
 esp_err_t EMC2101_init(bool);
 float EMC2101_get_external_temp(void);
 uint8_t EMC2101_get_internal_temp(void);
+esp_err_t EMC2101_configure_ideality(uint8_t);
+esp_err_t EMC2101_configure_beta_compensation(uint8_t);
 #endif /* EMC2101_H_ */

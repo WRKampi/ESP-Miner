@@ -247,6 +247,8 @@ static uint8_t _send_init(uint64_t frequency, uint16_t asic_count)
     // unsigned char init7[7] = {0x55, 0xAA, 0x53, 0x05, 0x00, 0x00, 0x03};
     // _send_simple(init7, 7);
 
+
+
     // split the chip address space evenly
     uint8_t address_interval = (uint8_t) (256 / chip_counter);
     for (uint8_t i = 0; i < chip_counter; i++) {
@@ -299,7 +301,9 @@ static uint8_t _send_init(uint64_t frequency, uint16_t asic_count)
         _send_BM1370((TYPE_CMD | GROUP_SINGLE | CMD_WRITE), set_3c_register_third, 6, BM1370_SERIALTX_DEBUG);
     }
 
-    do_frequency_ramp_up(frequency);
+    if(frequency != 0){
+        do_frequency_ramp_up(frequency);
+    }
 
     //BM1370_send_hash_frequency(frequency);
 

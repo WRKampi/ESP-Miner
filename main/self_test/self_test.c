@@ -220,10 +220,46 @@ void self_test(void * pvParameters)
         default:
     }
 
-
     SERIAL_init();
-    uint8_t chips_detected = (GLOBAL_STATE->ASIC_functions.init_fn)(GLOBAL_STATE->POWER_MANAGEMENT_MODULE.frequency_value, GLOBAL_STATE->asic_count);
-    ESP_LOGI(TAG, "%u chips detected, %u expected", chips_detected, GLOBAL_STATE->asic_count);
+    uint8_t chips_detected = 0;
+
+    // Calibrate the temp sensor if need be
+    switch (GLOBAL_STATE->device_model) {
+        case DEVICE_MAX:
+        case DEVICE_ULTRA:
+        case DEVICE_SUPRA:
+        case DEVICE_GAMMA:
+                // Init the asic and send 0 freq so we don't ramp up and produce any heat. This will init the temp sensor.
+                (GLOBAL_STATE->ASIC_functions.init_fn)(0, GLOBAL_STATE->asic_count);
+                // Set vcore to 0
+                VCORE_set_voltage(0.0, GLOBAL_STATE);
+                //Set ideality for correct temp slope
+                EMC2101_configure_ideality(0x37);
+                // Turn off any compensation or offsets
+                EMC2101_configure_beta_compensation(0b000111);
+                // Wait 3 seconds for everything to equalize
+                vTaskDelay(3000 / portTICK_PERIOD_MS);
+                float air_temp = EMC2101_get_internal_temp();
+                //Reads high
+                float asic_temp = EMC2101_get_external_temp();
+
+                float offset = asic_temp - air_temp;
+                ESP_LOGI(TAG, "Temp Offset: %f", offset);
+                //Multiply by 10 to add some precision, divide by 10 when get_u16
+                nvs_config_set_u16(NVS_CONFIG_EXTERNAL_TEMP_OFFSET, offset * 10);
+
+                //Re init the vcore and asic to proceed with testing
+                VCORE_init(GLOBAL_STATE);
+                VCORE_set_voltage(nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE) / 1000.0, GLOBAL_STATE);
+                chips_detected = (GLOBAL_STATE->ASIC_functions.init_fn)(GLOBAL_STATE->POWER_MANAGEMENT_MODULE.frequency_value, GLOBAL_STATE->asic_count);
+                ESP_LOGI(TAG, "%u chips detected, %u expected", chips_detected, GLOBAL_STATE->asic_count);
+            break;
+        default:
+            //init the vcore and asic to proceed with testing
+            chips_detected = (GLOBAL_STATE->ASIC_functions.init_fn)(GLOBAL_STATE->POWER_MANAGEMENT_MODULE.frequency_value, GLOBAL_STATE->asic_count);
+            ESP_LOGI(TAG, "%u chips detected, %u expected", chips_detected, GLOBAL_STATE->asic_count);
+    }
+
 
     int baud = (*GLOBAL_STATE->ASIC_functions.set_max_baud_fn)();
     vTaskDelay(10 / portTICK_PERIOD_MS);

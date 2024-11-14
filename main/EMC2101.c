@@ -33,6 +33,16 @@ esp_err_t EMC2101_init(bool invertPolarity) {
 
 }
 
+
+esp_err_t EMC2101_configure_ideality(uint8_t idealityFactor){
+    ESP_ERROR_CHECK(i2c_bitaxe_register_write_byte(emc2101_dev_handle, EMC2101_EXTERNAL_IDEALITY_FACTOR_REG, idealityFactor));
+    return ESP_OK;
+}
+esp_err_t EMC2101_configure_beta_compensation(uint8_t betaCompensation){
+    ESP_ERROR_CHECK(i2c_bitaxe_register_write_byte(emc2101_dev_handle, EMC2101_BETA_COMPENSATION_FACTOR_REG, betaCompensation));
+    return ESP_OK;
+}
+
 // takes a fan speed percent
 void EMC2101_set_fan_speed(float percent)
 {

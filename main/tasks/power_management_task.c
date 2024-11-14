@@ -212,7 +212,9 @@ void POWER_MANAGEMENT_task(void * pvParameters)
 
                 break;
             case DEVICE_GAMMA:
-                power_management->chip_temp_avg = GLOBAL_STATE->ASIC_initalized ? EMC2101_get_external_temp() : -1;
+                // Per device offset configured during the self test
+                float external_temp_offset = ((float)nvs_config_get_u16(NVS_CONFIG_EXTERNAL_TEMP_OFFSET, 0) / 10);
+                power_management->chip_temp_avg = GLOBAL_STATE->ASIC_initalized ? (EMC2101_get_external_temp() - external_temp_offset) : -1;
                 power_management->vr_temp = (float)TPS546_get_temperature();
 
                 // EMC2101 will give bad readings if the ASIC is turned off
