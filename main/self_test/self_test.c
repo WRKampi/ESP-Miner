@@ -234,20 +234,23 @@ void self_test(void * pvParameters)
                 // Set vcore to 0
                 VCORE_set_voltage(0.0, GLOBAL_STATE);
                 //Set ideality for correct temp slope
-                EMC2101_configure_ideality(0x37);
+                EMC2101_configure_ideality(EMC2101_GAMMA_DEF_IDEALITY);
                 // Turn off any compensation or offsets
-                EMC2101_configure_beta_compensation(0b000111);
-                // Wait 3 seconds for everything to equalize
-                vTaskDelay(3000 / portTICK_PERIOD_MS);
+                EMC2101_configure_beta_compensation(EMC2101_GAMMA_DEF_BETA);
+                // Wait 1 second for everything to equalize
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
                 float air_temp = EMC2101_get_internal_temp();
                 //Reads high
-                float asic_temp_old = EMC2101_get_external_temp();
-                float asic_temp_new = -99;
-                //If our most recent reading is more than 1C colder than the last, we're still cooling down
-                while(asic_temp_new + 1 < asic_temp_old){
+                float asic_temp_old = 256;
+                float asic_temp_new = EMC2101_get_external_temp();
+
+                //If our most recent reading is more than 0.25C colder than the last, we're still cooling down
+                while(asic_temp_new + 0.25 < asic_temp_old){
+                    ESP_LOGI(TAG, "Cooling... %fC => %fC",asic_temp_old, asic_temp_new);
                     vTaskDelay(5000 / portTICK_PERIOD_MS);
                     asic_temp_old = asic_temp_new;
                     asic_temp_new = EMC2101_get_external_temp();
+                    ESP_LOGI(TAG, "Cooling... %fC => %fC",asic_temp_old, asic_temp_new);
                 }
 
                 float offset = asic_temp_new - air_temp;
