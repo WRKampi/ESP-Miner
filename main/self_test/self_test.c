@@ -241,7 +241,14 @@ void self_test(void * pvParameters)
                 vTaskDelay(3000 / portTICK_PERIOD_MS);
                 float air_temp = EMC2101_get_internal_temp();
                 //Reads high
-                float asic_temp = EMC2101_get_external_temp();
+                float asic_temp_old = EMC2101_get_external_temp();
+                float asic_temp_new = -99;
+                //If our most recent reading is more than 1C colder than the last, we're still cooling down
+                while(asic_temp_new + 1 < asic_temp_old){
+                    vTaskDelay(5000 / portTICK_PERIOD_MS);
+                    asic_temp_old = asic_temp_new;
+                    asic_temp_new = EMC2101_get_external_temp();
+                }
 
                 float offset = asic_temp - air_temp;
                 ESP_LOGI(TAG, "Temp Offset: %f", offset);
