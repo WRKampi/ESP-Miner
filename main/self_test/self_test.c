@@ -250,7 +250,7 @@ void self_test(void * pvParameters)
                     asic_temp_new = EMC2101_get_external_temp();
                 }
 
-                float offset = asic_temp - air_temp;
+                float offset = asic_temp_new - air_temp;
                 ESP_LOGI(TAG, "Temp Offset: %f", offset);
                 //Multiply by 10 to add some precision, divide by 10 when get_u16
                 nvs_config_set_u16(NVS_CONFIG_EXTERNAL_TEMP_OFFSET, offset * 10);
