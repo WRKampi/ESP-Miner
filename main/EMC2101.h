@@ -3,6 +3,9 @@
 
 #include "i2c_bitaxe.h"
 
+#define EMC2101_GAMMA_DEF_IDEALITY 0x37
+#define EMC2101_GAMMA_DEF_BETA 0x07
+
 #define EMC2101_I2CADDR_DEFAULT 0x4C ///< EMC2101 default i2c address
 #define EMC2101_CHIP_ID 0x16         ///< EMC2101 default device id from part id
 #define EMC2101_ALT_CHIP_ID 0x28     ///< EMC2101 alternate device id from part id

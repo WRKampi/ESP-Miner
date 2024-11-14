@@ -108,6 +108,9 @@ void SYSTEM_init_peripherals(GlobalState * GLOBAL_STATE) {
         case DEVICE_SUPRA:
         case DEVICE_GAMMA:
             EMC2101_init(nvs_config_get_u16(NVS_CONFIG_INVERT_FAN_POLARITY, 1));
+
+            EMC2101_configure_ideality(EMC2101_GAMMA_DEF_IDEALITY);
+            EMC2101_configure_beta_compensation(EMC2101_GAMMA_DEF_BETA);
             break;
         default:
     }
